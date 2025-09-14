@@ -1,7 +1,7 @@
-from organizador_package.executar import executar_organizador_projetos
+from organizador_package.organizador import executar_pipe_organizador
 
 def main():
-    executar_organizador_projetos()
-        
-if __name__ == "__main__":
+    executar_pipe_organizador()
+
+if __name__ == '__main__':
     main()
