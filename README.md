@@ -1,38 +1,39 @@
-# Organizador de Projetos Musicais
+# 📁 Organizador de arquivos 📁
 
-Um script em Python para organizar automaticamente arquivos de projetos musicais em pastas e subpastas, separando por **grupos** (BEAT, GRAVAÇÃO, ROUGH MIX, MIXAGEM, MASTERIZAÇÃO) e **tipos de arquivos** (STEMS, MULTITRACK, TRACKS, PROJETOS). Ideal para produtores musicais que querem manter seus projetos organizados de forma eficiente.
+Um script em Python para organizar automaticamente arquivos em pastas e subpastas, separando-os por grupos com base em um template definido em JSON.
+Ideal para produtores musicais que querem manter seus projetos organizados de forma eficiente.
 
 ---
 
 ## 📝 Funcionalidades
 
-- Validação de entradas e diretórios.
-- Criação automática de pastas e subpastas com hierarquia:
+- ✅ Validação de entradas e diretórios.
+- ✅ Criação automática de pastas e subpastas hierárquicas.
+- ✅ Suporte a templates de até 4 níveis de aninhamento.
+- ✅ Separação de arquivos por grupo e subgrupo.
+- ✅ Identificação de arquivos por extensão e palavra-chave.
+- ✅ Movimento automático dos arquivos para suas respectivas pastas.
 
-GRUPO
-├── EXPORTAÇÕES
-│ ├── STEMS
-│ ├── MULTITRACK
-│ └── TRACKS
-└── PROJETOS
+---
 
-- Separação de arquivos por **grupo**:
-- `BEAT`
-- `GRAVAÇÃO`
-- `ROUGH MIX`
-- `MIXAGEM`
-- `MASTERIZAÇÃO`
-- `OUTROS` (arquivos não categorizados)
+## ❔ Como criar templates
 
-- Identificação de arquivos por **tipo**:
-- `STEMS` (ex.: KEYBOARDS, DRUMS, VOCALS)
-- `MULTITRACK`
-- `TRACKS` (faixas principais do projeto)
-- `PROJETOS` (.zip, .flp)
+1. Abra o arquivo config.json
+2. Crie adicione uma chave com o nome do seu template.
+3. Para criar pastas e subpastas use {}.
+4. Para sinalizar as extensões e palavras chaves dos arquivos que serão movidos, use [] (colchetes).
+Ex: 
 
-- Movimento automático dos arquivos para suas respectivas pastas.
-
-- Limpeza visual do terminal com animação de pontos durante a execução.
+```json
+{
+    "MEU_TEMPLATE": {
+        "Músicas": {
+            "Pop": ["Billie Elish", "Ariana Grande", ".mp3"],
+            "Rap": ["Kendrick Lammar", "Tyler The Creator", ".mp3"]
+        }
+    }
+}
+```
 
 ---
 
@@ -40,7 +41,7 @@ GRUPO
 
 - Python 3.10 ou superior
 - Sistema operacional compatível: Windows, Linux ou macOS
-- Permissões de leitura e escrita no diretório dos projetos
+- Permissões de leitura e escrita no diretório a ser organizado
 
 ---
 
@@ -50,67 +51,22 @@ GRUPO
 2. Abra o terminal na pasta do script.
 3. Execute o script:
  ```bash
- python organizador_projetos.py
+ python main.py
  ```
 4. Digite o caminho do diretório que deseja organizar.
 5. O script irá:
-    - Criar pastas e subpastas conforme os grupos.
-    - Separar os arquivos por grupo e tipo.
-    - Mover os arquivos para suas pastas corretas.
-6. Ao final, o terminal será limpo e a organização estará concluída.
+   - Criar pastas e subpastas conforme o template.
+   - Separar os arquivos por extensão e grupo.
+   - Mover os arquivos para suas respectivas pastas.
 
 ---
 
-## 🏷️ Convenção de Nomes de Arquivos
+## 💡 Melhorias Futuras
 
-Para que o script funcione corretamente, os arquivos precisam seguir um padrão de nomeação:
-
-|Tipo|----|Padrão|------------------------------------------|Exemplo|--------------------------|
-|STEM|----|(Nome_do_projeto)_(Tipo)_([Grupo]).extensão|-----|Projeto_BUS_VOCALS_[GRAVAÇÃO].wav
-|MULTITRACK|(Nome_do_projeto)_(Elemento)_([Grupo]).extensão|Projeto_GUITARRA_[BEAT].wav
-|PROJETO|--|(Nome_do_projeto)_([Grupo]).extensão|-----------|Projeto_[MIXAGEM].flp
-|TRACK|----|(Nome_do_projeto)_([Grupo]).extensão|-----------|Projeto_[MASTERIZAÇÃO].wav
-
-**⚠ Atenção: É importante manter o nome do grupo entre colchetes ([GRUPO]) e sem espaços para que o script consiga identificar corretamente.**
+- Função para criar templates automaticamente a partir da leitura de pastas.
+- Função para renomear arquivos automaticamente com base no template.
 
 ---
-
-## 📁 Estrutura das pastas criada
-
-DIRETÓRIO_DO_PROJETO
-├── BEAT
-│   ├── EXPORTAÇÕES
-│   │   ├── STEMS
-│   │   ├── MULTITRACK
-│   │   └── TRACKS
-│   └── PROJETOS
-├── GRAVAÇÃO
-│   ├── EXPORTAÇÕES
-│   │   ├── STEMS
-│   │   ├── MULTITRACK
-│   │   └── TRACKS
-│   └── PROJETOS
-├── ROUGH MIX
-│   ├── EXPORTAÇÕES
-│   │   ├── INSTRUMENTAL
-│   │   │   ├── STEMS
-│   │   │   ├── MULTITRACK
-│   │   │   └── TRACKS
-│   │   └── VOCALS
-│   │       ├── STEMS
-│   │       ├── MULTITRACK
-│   │       └── TRACKS
-│   └── PROJETOS
-├── MIXAGEM
-│   ├── EXPORTAÇÕES
-│   └── PROJETOS
-├── MASTERIZAÇÃO
-│   ├── EXPORTAÇÕES
-│   └── PROJETOS
-└── OUTROS
-
----
-
 ## 👤 Criador
 
 - Nome: Anderson G. A. Alves
