@@ -1,195 +1,189 @@
-import shutil
 import os
+import shutil
+import json
 
-from .validar import validar_str, validar_diretorio, verificar_grupo, verificar_projeto, verificar_stems, verificar_track
-from .config import GRUPOS, SUBPASTAS
+from collections.abc import Iterable
+from typing import Any
 
-def ler_arquivos_do_diretorio(diretorio: str) -> list[str]:
+from .utills import pedir_diretorio, adicionar_a
+
+with open("src\\organizador_package\\config.json", "r", encoding="utf-8") as config:
+    config = json.load(config)
+
+def ler_arquivos(diretorio: str) -> tuple[str]:
     """
-    Lê os arquivos do diretório e retorna uma lista com os endereços completos dos arquivos.
+    Lê os arquivos de um diretorio e retorna seus endereços numa tupla.
 
     Args:
-        diretorio (str): Caminho do diretório a ser lido.
-    
+        diretorio (str): Diretorio com os arquivos.
+
     Returns:
-        list[str]: Lista com os endereços completos dos arquivos.
+        tuple: endereços dos arquivos.
     
     Raises:
         TypeError: Se 'diretorio' não for str.
-    
-    Examples:
-        >>> ler_arquivos_do_diretorio('C:/MeusArquivos')
-        ['C:/MeusArquivos/arquivo1.txt', 'C:/MeusArquivos/arquivo2.mp3', ...]
     """
     #Type check
-    diretorio = validar_str(diretorio)
+    if not isinstance(diretorio, str):
+        raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
 
-    #FileExist check
-    diretorio = validar_diretorio(diretorio)
+    #File check
+    if not os.path.exists(diretorio):
+        raise FileExistsError(f"O diretorio {diretorio} não existe")
 
-    #Lendo os arquivos do diretório
-    arquivos_diretorio = os.listdir(diretorio)
+    enderecos = tuple(
+        os.path.join(diretorio, item) #Cria um endereço seguro do arquivo
+        for item in os.listdir(diretorio) #Lê os arquivos do diretorio
+        if os.path.isfile(os.path.join(diretorio, item)) #Verifica se o item é um arquivo
+    )
 
-    #Retornando a lista com os endereços completos dos arquivos
-    return [os.path.join(diretorio, arquivo) for arquivo in arquivos_diretorio]
+    return enderecos
 
-def separar_enderecos_por_grupo(arquivos: list[str]) -> dict[str, list[str]]:
+def separar_por_template(
+    enderecos: Iterable[str], 
+    template: dict[str, Any] = 'TEMPLATE_PADRÃO'
+    ) -> dict[str, Any]:
 
-    enderecos_por_grupo = {}
-
-    for endereco_arquivo in arquivos:
-        if os.path.isfile(endereco_arquivo):
-            adicionado = False
-            for grupo in GRUPOS:
-                if verificar_grupo(os.path.basename(endereco_arquivo), grupo):
-                    enderecos_por_grupo.setdefault(grupo, []).append(endereco_arquivo)
-                    adicionado = True
-                    break
-
-            if not adicionado:
-                enderecos_por_grupo.setdefault('OUTROS', []).append(endereco_arquivo)
-
-    return enderecos_por_grupo
-
-def criar_sub_pastas_n1(caminho: str) -> None:
     """
-    Cria pastas com os nomes das strings armazenadas na chave 'n1' do dict SUBPASTAS.
+    Separa os endereços baseado no template.
 
     Args:
-        caminho (str): Caminho onde a pasta será criada.
-    
+        enderecos (Iterable): Coleção com os endereços dos arquivos.
+        template (dict[str, any]): Template de separação.
+
     Returns:
-        None
+        dict ([str, any]): Arquivos separados.
     
     Raises:
-        TypeError: Se 'caminho' não for str.
+        TypeError: Se 'enderecos' não for iterável.
+        ValueError: Se 'enderecos' estiver vazio.
+
+    Examples:
+        >>> separar_por_grupo(("Download\\Audio.mp3", "Download\\Imagem.jpg", "Download\\documento.txt"))
+        {
+        'Áudios': ['Download\\Audio.mp3'],
+        'Imagens': ['Download\\Imagem.jpg'],
+        'Documentos': ['Download\\documento.txt']
+        }
     """
+    
+    if not isinstance(enderecos, Iterable):
+        raise TypeError(f"enderecos deve ser um iterável. Você passou {type(enderecos).__name__}")
 
-    for sub_pasta_n1 in SUBPASTAS['n1']:
-        caminho_n1 = os.path.join(caminho, sub_pasta_n1)
-        os.makedirs(caminho_n1)
+    if not enderecos:
+        raise ValueError("enderecos não pode estar vazio")
 
-def criar_sub_pastas_n2(caminho: str) -> None:
 
-    if not 'EXPORTAÇÕES' in caminho:
-        caminho = os.path.join(caminho, 'EXPORTAÇÕES')
+    arqs_separados = {}
 
-    for sub_pasta_n2 in SUBPASTAS['n2']:
-        caminho_n2 = os.path.join(caminho, sub_pasta_n2)
-        os.makedirs(caminho_n2)
-        criar_sub_pastas_n3(caminho_n2)
+    for grupo, valor in config[f'{template}'].items():
 
-def criar_sub_pastas_n3(caminho: str) -> None:
+        if isinstance(valor, dict):
+            sub1_chave = arqs_separados.setdefault(grupo, {})
 
-    if not 'EXPORTAÇÕES' in caminho:
-        caminho = os.path.join(caminho, 'EXPORTAÇÕES')
+            for sub1_nome, sub1_conteudo in valor.items():
 
-    for sub_pasta_n3 in SUBPASTAS['n3']:
-        caminho_n3 = os.path.join(caminho, sub_pasta_n3)
-        os.makedirs(caminho_n3)
+                if isinstance(sub1_conteudo, dict):
+                    sub2_chave = sub1_chave.setdefault(sub1_nome, {})
 
-def criar_pastas(grupos, diretorio: str) -> None:
+                    for sub2_nome, sub2_conteudo in sub1_conteudo.items():
+
+                        if isinstance(sub2_conteudo, dict):
+                            sub3_chave = sub2_chave.setdefault(sub2_nome, {})
+
+                            for sub3_nome, sub3_conteudo in sub2_conteudo.items():
+
+                                if isinstance(sub3_conteudo, dict):
+                                    raise ValueError("Muitas pastas aninhadas")
+
+                                adicionar_a(sub3_chave, grupo, sub3_nome, enderecos, sub3_conteudo)
+
+                        else:
+                            adicionar_a(sub2_chave, grupo, sub2_nome, enderecos, sub2_conteudo)
+
+                else:
+                    adicionar_a(sub1_chave, grupo, sub1_nome, enderecos, sub1_conteudo)
+        else:
+            adicionar_a(arqs_separados, grupo, grupo, enderecos, valor)
+
+    return arqs_separados
+
+def gerar_enderecos(
+    arqs_por_template: dict[str, Any], 
+    base: str = ""
+) -> tuple[str]:
     """
-    Cria pastas e subpastas para cada grupo da constante GRUPOS.
+    Gera todos os endereços finais (incluindo os arquivos)
+    a partir da estrutura aninhada de dicionários do separador.
 
     Args:
-        diretorio (str): onde as pastas serão criadas.
+        arqs_por_template (dict): Estrutura de arquivos agrupados.
+        base (str): Caminho base acumulado.
 
-    Raises:
-        TypeError: Se 'diretorio' não for str.
-
+    Returns:
+        tuple[str]: Coleção com os caminhos completos até os arquivos.
     """
 
-    diretorio = validar_str(diretorio)
+    if not isinstance(arqs_por_template, dict):
+        raise TypeError(f"arqs_por_template deve ser dict. Você passou {type(arqs_por_template).__name__}")
 
-    for grupo in grupos.keys():
-        caminho = os.path.join(diretorio, grupo)
+    enderecos = []
 
-        if os.path.exists(caminho):
-            continue
+    for grupo, valor in arqs_por_template.items():
+        novo_base = os.path.join(base, grupo)
 
-        os.makedirs(caminho)
+        if isinstance(valor, dict):
+            enderecos.extend(gerar_enderecos(valor, novo_base))
+        elif isinstance(valor, list):
+            for arquivo in valor:
+                enderecos.append(os.path.join(novo_base, os.path.basename(arquivo)))
 
-        match grupo:
-            case 'BEAT':
+    return tuple(enderecos)
 
-                criar_sub_pastas_n1(caminho)
-                criar_sub_pastas_n3(caminho)
-
-            case 'GRAVAÇÃO':
-
-                criar_sub_pastas_n1(caminho)
-                criar_sub_pastas_n3(caminho)
-
-            case 'ROUGH MIX':
-                criar_sub_pastas_n1(caminho)
-                criar_sub_pastas_n2(caminho)
-
-            case 'OUTROS':
-                pass
-
-            case _:
-                criar_sub_pastas_n1(caminho)        
-
-def separar_por_tipo(diretorio, grupo_enderecos: dict[str, list[str]]) -> dict[str, dict[str, list[str]]]:
-    separados_por_grupos_e_tipo = {}
-
-    for grupo, enderecos in grupo_enderecos.items():
-
-        for endereco in enderecos:
-            nome_arquivo = os.path.basename(endereco)
-            
-            if verificar_stems(nome_arquivo):
-                separados_por_grupos_e_tipo.setdefault(grupo, {}).setdefault('STEMS', []).append(endereco)
-            elif verificar_projeto(nome_arquivo):
-                separados_por_grupos_e_tipo.setdefault(grupo, {}).setdefault('PROJETOS', []).append(endereco)
-            elif verificar_track(diretorio, grupo, nome_arquivo):
-                separados_por_grupos_e_tipo.setdefault(grupo, {}).setdefault('TRACKS', []).append(endereco)
-            else:
-                separados_por_grupos_e_tipo.setdefault(grupo, {}).setdefault('MULTITRACK', []).append(endereco)
-
-    return separados_por_grupos_e_tipo
-
-def mover_arquivos(diretorio, grupo_enderecos):
+def criar_pastas(diretorio: str, enderecos: Iterable[str]) -> None:
+    """
+    Cria pastas com base nos endereços.
     
-    for grupo, tipos in grupo_enderecos.items():
-        for tipo, enderecos in tipos.items():
-            for endereco in enderecos:
-                match tipo:
+    Args:
+        diretorio (str): Diretorio onde as pastas vão ser criadas.
+        enderecos (Iterable[str]): Endereços dos arquivos.
+        
+    Raises:
+        TypeError: Se 'diretorio' não for str ou 'enderecos' não for list.
+    """
+    #Type check
+    if not isinstance(diretorio, str):
+        raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
+    if not isinstance(enderecos, Iterable):
+        raise TypeError(f"enderecos deve ser list. Você passou {type(enderecos).__name__}")
 
-                    case 'STEMS':
-                        shutil.move(
-                            endereco,
-                            os.path.join(diretorio, grupo, 'EXPORTAÇÕES', tipo, os.path.basename(endereco))
-                            )
+    for endereco in enderecos:
+        caminho = os.path.dirname(os.path.join(diretorio, endereco))
+        if not os.path.exists(caminho):
+            os.makedirs(caminho)
 
-                    case 'MULTITRACK':
-                        caminho = os.path.join(diretorio, grupo, 'EXPORTAÇÕES', tipo)
+def mover_arquivos(diretorio: str, enderecos: Iterable[str]) -> None:
+    """
+    Move os arquivos para as pasta do seu grupo respectivo.
 
-                        if grupo == 'OUTROS':
-                            shutil.move(
-                                endereco,
-                                os.path.join(diretorio, grupo, os.path.basename(endereco))
-                                )
-                        elif os.path.exists(caminho):
-                            shutil.move(
-                                endereco,
-                                os.path.join(caminho, os.path.basename(endereco))
-                                )
-                        else:
-                            shutil.move(
-                                endereco,
-                                os.path.join(diretorio, grupo, 'EXPORTAÇÕES', os.path.basename(endereco))
-                                )
+    Args:
+        diretorio (str): diretorio onde os arquivos se encontram.
+        enderecos (Iterable[str]): Endereços do arquivos.
+    """
+    for endereco in enderecos:
+        origem = os.path.join(diretorio, os.path.basename(endereco))
+        destino = os.path.join(diretorio, endereco)
+        shutil.move(origem, destino)
 
-                    case 'PROJETOS':
-                        shutil.move(
-                            endereco,
-                            os.path.join(diretorio, grupo, 'PROJETOS', os.path.basename(endereco))
-                        )
+def executar_pipe_organizador():
+    """Executa a lógica do organizador."""
 
-                    case _:
-                        shutil.move(
-                            endereco,
-                            os.path.join(diretorio, grupo, 'EXPORTAÇÕES', 'TRACKS', os.path.basename(endereco))
-                            )
+    try:
+        diretorio = pedir_diretorio()
+        enderecos = ler_arquivos(diretorio)
+        enderecos_separados = separar_por_template(enderecos, template='TEMPLATE_PROJETOS')
+        lista_de_enderecos = gerar_enderecos(enderecos_separados)
+        criar_pastas(diretorio, lista_de_enderecos)
+        mover_arquivos(diretorio, lista_de_enderecos)
+    except Exception as e:
+        print(e)

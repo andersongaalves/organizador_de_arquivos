@@ -1,0 +1,53 @@
+{
+    "TEMPLATE_PADRÃO": {
+            "Áudios": [".mp3", ".wav"], 
+            "Imagens": [".jpg", ".jpeg", ".png"],
+            "Documentos": [".pdf", ".txt", ".csv", ".xlsx", ".zip", ".rar"],
+            "Executavel": [".exe"]
+            },
+
+    "TEMPLATE_PROJETOS": {
+        "BEAT": {
+            "EXPORTAÇÕES": {
+                "MULTITRACK": [
+                    "trombone", "trumpet", "violino", "perc", "clap", "cello", 
+                    "bass", "kick", "snare", "hi hat", "cymbal", "open hat"
+                ],
+                "STEMS": ["bus", "stem", "stems", "drums", "bases"]
+            },
+            "PROJETOS": [".zip", ".flp"]
+        },
+        "GRAVAÇÃO": {
+            "EXPORTAÇÕES": {
+                "MULTITRACK": ["voz", "dobra", "adlib", "adlibs"],
+                "STEMS": ["vocals", "vozes", "bus", "mix bus"]
+            },
+            "PROJETOS": [".zip", ".flp"]
+        },
+        "ROUGH MIX": {
+            "EXPORTAÇÕES": {
+                "INSTRUMENTAL": {
+                    "MULTITRACK": [
+                    "trombone", "trumpet", "violino", "perc", "clap", "cello", 
+                    "bass", "kick", "snare", "hi hat", "cymbal", "open hat",
+                    "sfx", "tag", "drum"
+                ],
+                    "STEMS": ["bus", "stem", "stems", "drums", "bases"]
+                },
+                "VOCALS": {
+                    "MULTITRACK": ["voz", "dobra", "adlib", "adlibs"],
+                    "STEMS": ["vocals", "vozes", "bus", "mix bus"]
+                }
+            },
+            "PROJETOS": [".zip", ".flp"]
+        },
+        "MIXAGEM": {
+            "EXPORTAÇÕES": [".wav", ".mp3"],
+            "PROJETOS": [".zip", ".flp"]
+        },
+        "MASTERIZAÇÃO": {
+            "EXPORTAÇÕES": [".wav", ".mp3"],
+            "PROJETOS": [".zip", ".flp"]
+        }
+    }
+}

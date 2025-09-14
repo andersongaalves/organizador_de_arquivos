@@ -1,6 +1,6 @@
-import os
+from os.path import basename, exists
 
-from .config import STEMS, PROJETOS
+from collections.abc import Iterable
 
 def validar_str(string) -> str:
     """
@@ -27,20 +27,19 @@ def validar_str(string) -> str:
      """
 
     if not isinstance(string, str):
-        raise TypeError(f'{string} deve ser str. Você passou {type(string).__name__}')
+        raise TypeError(f'"{string}" deve ser str. Você passou {type(string).__name__}')
 
     return string
 
-def validar_diretorio(diretorio: str) -> str:
+def validar_diretorio(diretorio: str) -> bool | str:
     """
-    Verifica se o diretório existe.
-    Retorna o diretório se existir, caso contrário, lança FileNotFoundError.
+    Verifica se o diretório existe. Retorna True se existir caso contrário, lança FileNotFoundError.
 
     Args:
         diretorio (str): O diretório a ser verificado.
     
     Returns:
-        str: O diretório verificado.
+        bool: True se existir, False caso contrário.
 
     Raises:
         TypeError: Se 'diretorio' não for str.
@@ -59,114 +58,34 @@ def validar_diretorio(diretorio: str) -> str:
     diretorio = validar_str(diretorio)
 
     #Verificando se o diretório existe
-    if not os.path.exists(diretorio):
+    if not exists(diretorio):
         raise FileNotFoundError(f'O diretório {diretorio} não existe.')
 
     return diretorio
 
-def verificar_grupo(arquivo: str, grupo: str) -> bool:
-    """
-    Verifica se o nome do grupo está contido no nome do arquivo.
-    Retorna True se estiver contido, caso contrário, retorna False.
+def verificar_condicao(endereco: str, subgrupo: str, condicoes: Iterable) -> bool:
+    if isinstance(condicoes, (tuple, list)):
+        for condicao in condicoes:
+            return verificar_condicao(endereco, subgrupo, condicao)
 
-    Args:
-        arquivo (str): Nome do arquivo a ser verificado.
-        grupo (str): Nome do grupo a ser verificado.
-    
-    Returns:
-        bool: True se o nome do grupo estiver contido, False caso contrário.
+    elif isinstance(condicoes, str):  
+        return any((
+            endereco.endswith(condicoes), 
+            condicoes in basename(endereco),
+            subgrupo in basename(endereco)
+            ))
 
-    Raises:
-        TypeError: Se 'arquivo' ou 'grupo' não forem str.
+def pertence_ao_grupo(endereco, grupo_base, subgrupo, condicoes) -> bool:
+    endereco = endereco.lower()
+    grupo_base = grupo_base.lower()
 
-    Examples:
-        >>> verificar_grupo('minha_musica_BEAT.wav', 'BEAT')
-        True
-        >>> verificar_grupo('minha_musica_GRAVAÇÃO.mp3', 'BEAT')
-        False
-    """
+    for condicao in condicoes:
 
-    #Type check
-    arquivo = validar_str(arquivo)
-    grupo = validar_str(grupo)
+        resultado = all((
+            grupo_base in basename(endereco), 
+            verificar_condicao(endereco, subgrupo, condicao)
+        ))
+        if resultado:
+            break
 
-    #Verificando se o nome do grupo está contido no nome do arquivo
-    if grupo in arquivo:
-        return True
-
-    return False
-
-def verificar_projeto(arquivo: str) -> bool:
-    """
-    Verifica se a extensão do arquivo está na lista de extensões de projetos.
-    Retorna True se estiver, caso contrário, retorna False.
-
-    Args:
-        arquivo (str): Nome do arquivo a ser verificado.
-
-    Raises:
-        TypeError: Se 'arquivo' não for str.
-
-    Examples:
-        >>> verificar_projeto('meu_projeto.flp')
-        True
-        >>> verificar_projeto('minha_musica.mp3')
-        False
-    """
-    _, extensao_arq = os.path.splitext(arquivo)
-
-    if extensao_arq in PROJETOS:
-        return True
-
-    return False
-
-def verificar_stems(endereco_arquivo: str) -> bool:
-    """
-    Verifica se o nome do arquivo contém algum dos nomes de stems definidos.
-    Retorna True se contiver, caso contrário, retorna False.
-
-    Args:
-        endereco_arquivo (str): Endereço completo do arquivo a ser verificado.
-    
-    Raises:
-        TypeError: Se 'endereco_arquivo' não for str.
-    
-    Examples:
-        >>> verificar_stems('C:/Musicas/track1_Vocals.wav')
-        True
-        >>> verificar_stems('C:/Musicas/track1_Voz_Principal.mp3')
-        False
-    """
-
-    endereco_arquivo = validar_str(endereco_arquivo)
-
-    for mix_bus in STEMS:
-        nome_arquivo = os.path.basename(endereco_arquivo)
-        
-        if mix_bus in nome_arquivo:
-            return True
-
-    return False
-
-def verificar_track(diretorio: str, grupo: str, nome_arquivo: str) -> bool:
-    """
-    Verifica se o nome do arquivo é igual ao do diretorio ou diretorio + grupo.
-    Retorna True se for, False caso contrário.
-
-    Args:
-        diretorio (str): Endereço do diretorio.
-        grupo (str): Nome do grupo
-        nome_arquivo (str): Nome do arquivo a ser verificado.
-
-    Returns:
-        bool: True se for igual, False caso contrário.
-    
-    Raises:
-        TypeError: Se 'diretorio', 'grupo' ou 'nome_arquivo' não forem str.
-    
-    Examples:
-        >>> verificar_track()
-    """
-    nome_arquivo, _ = os.path.splitext(nome_arquivo)
-
-    return nome_arquivo in (diretorio, f'{diretorio} [{grupo}]')
+    return resultado

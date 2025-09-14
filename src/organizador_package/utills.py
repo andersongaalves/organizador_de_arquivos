@@ -1,19 +1,18 @@
 import os
 
-def exibir(template: str):
-    print(template)
-    print(f'{"=" * 60}' + '\n')
+from .validar import pertence_ao_grupo, validar_diretorio
 
-def pedir_diretorio() -> str:
-    return input('Digite o caminho do diretório que deseja organizar: ')
+def tratar_input_texto(entrada: str) -> str:
+    return entrada.strip()
 
-def limpar_terminal(delay=1.5):
-    animar_pontos(3, delay)
-    os.system('cls' if os.name == 'nt' else 'clear')
+def pedir_diretorio():
+    return validar_diretorio(tratar_input_texto(input('Digite o endereço do diretorio: ')))
 
-def animar_pontos(pontos=3, tempo=1.5):
-    import time
+def pegar_extensao(endereco: str) -> str:
+    return os.path.splitext(endereco)[1].lower()
 
-    for _ in range(pontos):
-        print('.', end='', flush=True)
-        time.sleep(tempo / pontos)
+def adicionar_a(colecao: dict, grupo_base: str, subgrupo: str, enderecos: list, condicoes: list):
+    colecao[subgrupo] = [
+            endereco for endereco in enderecos
+            if pertence_ao_grupo(endereco, grupo_base, subgrupo, condicoes)
+            ]
