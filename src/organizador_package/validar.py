@@ -39,7 +39,7 @@ def validar_diretorio(diretorio: str) -> bool | str:
         diretorio (str): O diretório a ser verificado.
     
     Returns:
-        bool: True se existir, False caso contrário.
+        bool: Retorna o valor de diretorio se existir, False caso contrário.
 
     Raises:
         TypeError: Se 'diretorio' não for str.
@@ -54,6 +54,7 @@ def validar_diretorio(diretorio: str) -> bool | str:
             ...
         FileNotFoundError: O diretório C:/Caminho/Inexistente não existe.
     """
+
     #Type check
     diretorio = validar_str(diretorio)
 
@@ -64,6 +65,35 @@ def validar_diretorio(diretorio: str) -> bool | str:
     return diretorio
 
 def verificar_condicao(endereco: str, subgrupo: str, condicoes: Iterable) -> bool:
+    """
+    Verifica se o arquivo preenche as condições.
+
+    Args:
+        endereco (str): Endereço do arquivo.
+        subgrupo (str): Nome da pasta a qual o pertencimento será verificado.
+        condicoes (Iterable): Condições de pertencimento.
+
+    Raises:
+        TypeError: Se 'enderecos' e 'subgrupo' não forem str ou se 'condicoes' não for Iterable.
+        ValueError: Se algum argumento estiver vazio.
+    """
+
+    #Type check
+    if not isinstance(endereco, str):
+        raise TypeError(f"endereco deve ser str. Você passou {type(endereco).__name__}")
+    if not isinstance(subgrupo, str):
+        raise TypeError(f"subgrupo deve ser str. Você passou {type(subgrupo).__name__}")
+    if not isinstance(condicoes, Iterable):
+        raise TypeError(f"condicoes deve ser Iterable. Você passou {type(condicoes).__name__}")
+    
+    #Value check
+    if not endereco:
+        raise ValueError(f"endereco não pode estar vazio")
+    if not subgrupo:
+        raise ValueError(f"subgrupo não pode estar vazio")
+    if not condicoes:
+        raise ValueError(f"condicoes não pode estar vazio")
+
     if isinstance(condicoes, (tuple, list)):
         for condicao in condicoes:
             return verificar_condicao(endereco, subgrupo, condicao)
@@ -75,7 +105,34 @@ def verificar_condicao(endereco: str, subgrupo: str, condicoes: Iterable) -> boo
             subgrupo in basename(endereco)
             ))
 
-def pertence_ao_grupo(endereco, grupo_base, subgrupo, condicoes) -> bool:
+def atende_as_condicoes(endereco: str, grupo_base: str, subgrupo: str, condicoes: Iterable) -> bool:
+    """
+    Verifica se o arquivo atende as condições necessárias de pertencimento.
+
+    Args:
+        endereco (str): Endereço completo do arquivo.
+        grupo_base (str): Primeira pasta em relação ao diretorio principal.
+        subgrupo (str): Nome da subpasta.
+        condicoes (Iterable): Condições de pertencimento.
+
+    Returns:
+        bool: True se as condições forem atendidas, False caso contrário.
+
+    Raises:
+        TypeError: Se 'endereco,' 'grupo_base' ou 'subgrupo' não forem str. Se 'condicoes' não for Iterable.
+    """
+
+    #Type check
+    if not isinstance(endereco, str):
+        raise TypeError(f"endereco deve ser str. Você passou {type(endereco).__name__}")
+    if not isinstance(grupo_base, str):
+        raise TypeError(f"grupo_base deve ser str. Você passou {type(grupo_base).__name__}")
+    if not isinstance(subgrupo, str):
+        raise TypeError(f"subgrupo deve ser str. Você passou {type(subgrupo).__name__}")
+    if not isinstance(condicoes, Iterable):
+        raise TypeError(f"condicoes deve ser Iterable. Você passou {type(condicoes).__name__}")
+
+
     endereco = endereco.lower()
     grupo_base = grupo_base.lower()
 

@@ -22,11 +22,15 @@ def ler_arquivos(diretorio: str) -> tuple[str]:
     
     Raises:
         TypeError: Se 'diretorio' não for str.
+        ValueError: Se 'diretorio' estiver vazio.
     """
+
     #Type check
     if not isinstance(diretorio, str):
         raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
-
+    #Value check
+    if not diretorio:
+        raise ValueError(f"o diretorio não pode estar vazio")
     #File check
     if not os.path.exists(diretorio):
         raise FileExistsError(f"O diretorio {diretorio} não existe")
@@ -41,22 +45,22 @@ def ler_arquivos(diretorio: str) -> tuple[str]:
 
 def separar_por_template(
     enderecos: Iterable[str], 
-    template: dict[str, Any] = 'TEMPLATE_PADRÃO'
+    template: str = 'TEMPLATE_PADRÃO'
     ) -> dict[str, Any]:
 
     """
     Separa os endereços baseado no template.
 
     Args:
-        enderecos (Iterable): Coleção com os endereços dos arquivos.
+        enderecos (Iterable[str]): Coleção com os endereços dos arquivos.
         template (dict[str, any]): Template de separação.
 
     Returns:
         dict ([str, any]): Arquivos separados.
     
     Raises:
-        TypeError: Se 'enderecos' não for iterável.
-        ValueError: Se 'enderecos' estiver vazio.
+        TypeError: Se 'enderecos' não for iterável ou 'template' não for dict.
+        ValueError: Se 'enderecos' ou 'template' estiver vazio.
 
     Examples:
         >>> separar_por_grupo(("Download\\Audio.mp3", "Download\\Imagem.jpg", "Download\\documento.txt"))
@@ -67,11 +71,16 @@ def separar_por_template(
         }
     """
     
+    #Type check
     if not isinstance(enderecos, Iterable):
         raise TypeError(f"enderecos deve ser um iterável. Você passou {type(enderecos).__name__}")
-
+    if not isinstance(template, str):
+        raise TypeError(f"template deve ser str. Você passou {type(template).__name__}")
+    #Value check
     if not enderecos:
         raise ValueError("enderecos não pode estar vazio")
+    if not template:
+        raise ValueError("template não pode estar vazio")
 
 
     arqs_separados = {}
@@ -122,10 +131,18 @@ def gerar_enderecos(
 
     Returns:
         tuple[str]: Coleção com os caminhos completos até os arquivos.
+    
+    Raises:
+        TypeError: Se 'arqs_por_template' não for dict.
+        ValueError: Se 'arqs_por_template' estiver vazio.
     """
 
+    #Type check
     if not isinstance(arqs_por_template, dict):
         raise TypeError(f"arqs_por_template deve ser dict. Você passou {type(arqs_por_template).__name__}")
+    #Value check
+    if not arqs_por_template:
+        raise ValueError(f"arqs_por_template não pode estar vazio")
 
     enderecos = []
 
@@ -149,13 +166,18 @@ def criar_pastas(diretorio: str, enderecos: Iterable[str]) -> None:
         enderecos (Iterable[str]): Endereços dos arquivos.
         
     Raises:
-        TypeError: Se 'diretorio' não for str ou 'enderecos' não for list.
+        TypeError: Se 'diretorio' não for str ou 'enderecos' não for Iterable.
+        ValueError: Se 'enderecos' estiver vazio.
     """
+
     #Type check
     if not isinstance(diretorio, str):
         raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
     if not isinstance(enderecos, Iterable):
-        raise TypeError(f"enderecos deve ser list. Você passou {type(enderecos).__name__}")
+        raise TypeError(f"enderecos deve ser Iterable. Você passou {type(enderecos).__name__}")
+    #Value check
+    if not enderecos:
+        raise ValueError(f"enderecos não pode estar vazio")
 
     for endereco in enderecos:
         caminho = os.path.dirname(os.path.join(diretorio, endereco))
@@ -169,7 +191,21 @@ def mover_arquivos(diretorio: str, enderecos: Iterable[str]) -> None:
     Args:
         diretorio (str): diretorio onde os arquivos se encontram.
         enderecos (Iterable[str]): Endereços do arquivos.
+    
+    Raises:
+        TypeError: Se 'diretorio' não for str ou 'enderecos' não for Iterable.
+        ValueError: Se 'enderecos' estiver vazio.
     """
+
+    #Type check
+    if not isinstance(diretorio, str):
+        raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
+    if not isinstance(enderecos, Iterable):
+        raise TypeError(f"enderecos deve ser Iterable. Você passou {type(enderecos).__name__}")
+    #Value check
+    if not enderecos:
+        raise ValueError(f"enderecos não pode estar vazio")
+
     for endereco in enderecos:
         origem = os.path.join(diretorio, os.path.basename(endereco))
         destino = os.path.join(diretorio, endereco)
