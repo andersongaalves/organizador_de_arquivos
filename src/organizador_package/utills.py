@@ -2,7 +2,7 @@ import os
 
 from collections.abc import Iterable
 
-from .validar import atende_as_condicoes, validar_diretorio
+from .validar import atende_as_condicoes, validar_diretorio, validar_tipo
 
 def tratar_texto(entrada: str) -> str:
     """
@@ -17,8 +17,8 @@ def tratar_texto(entrada: str) -> str:
     """
 
     #Type check
-    if not isinstance(entrada, str):
-        raise TypeError(f"entrada deve ser str. Você passou {type(entrada).__name__}")
+    validar_tipo('entrada', entrada, str)
+
     #Value check
     if not entrada:
         raise ValueError(f"entrada não pode estar vazia")
@@ -52,11 +52,12 @@ def pegar_extensao(endereco: str) -> str:
     """
 
     #Type check
-    if not isinstance(endereco, str):
-        raise TypeError(f"endereco deve ser str. Você passou {type(endereco).__name__}")
+    validar_tipo('endereco', endereco, str)
+
     #Value check
     if not endereco:
         raise ValueError(f"endereco não pode estar vazio")
+
     #File check
     if not os.path.isfile(endereco):
         raise FileNotFoundError(f"endereco deve apontar para um arquivo.")
@@ -78,14 +79,11 @@ def adicionar_a(colecao: dict, grupo_base: str, subgrupo: str, enderecos: Iterab
     """
 
     #Type check
-    if not isinstance(enderecos, Iterable):
-        raise TypeError(f"enderecos deve ser Iterable. Você passou {type(enderecos).__name__}")
-    if not isinstance(grupo_base, str):
-        raise TypeError(f"grupo_base deve ser str. Você passou {type(grupo_base).__name__}")
-    if not isinstance(subgrupo, str):
-        raise TypeError(f"subgrupo deve ser str. Você passou {type(subgrupo).__name__}")
-    if not isinstance(condicoes, Iterable):
-        raise TypeError(f"condicoes deve ser Iterable. Você passou {type(condicoes).__name__}")
+    validar_tipo('colecao', colecao, dict)
+    validar_tipo('enderecos', enderecos, Iterable)
+    validar_tipo('grupo_base', grupo_base, str)
+    validar_tipo('subgrupo', subgrupo, str)
+    validar_tipo('condicoes', condicoes, Iterable)
     
     colecao[subgrupo] = [
             endereco for endereco in enderecos

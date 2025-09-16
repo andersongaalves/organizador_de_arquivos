@@ -1,36 +1,43 @@
 from os.path import basename, exists
 
 from collections.abc import Iterable
+from typing import Any
 
-def validar_str(string) -> str:
+def validar_tipo(
+    nome_var: str, 
+    valor_var: Any, 
+    tipo_esperado: type | tuple[type,...]
+    ) -> None:
+
     """
-    Verifica se o argumento passado é uma string.
-    Retorna o texto da string se for, caso contrário, lança TypeError.
+    Verifica se uma variável é do tipo esperado. 
+    Se não for, lança TypeError.
 
     Args:
-        string: O argumento a ser verificado.
+        nome_var (str): Nome da variável verificada.
+        valor_var (Any): Valor da variável.
+        tipo_esperado (type | tuple[type, ...]): Tipo ou tupla de tipos esperados.
 
-    Returns:
-        str: O texto da string verificada.
-    
     Raises:
-        TypeError: Se 'string' não for str.
+        TypeError: Se 'nome_var' não for str.
+        TypeError: Se 'valor_var' não for do(s) tipo(s) esperado(s).
+    """
 
-    Examples:
-        >>> verificar_str('Olá, mundo!')
-        'Olá, mundo!'
+    if not isinstance(nome_var, str):
+        raise TypeError(f"nome_var deve ser str. Você passou {type(nome_var).__name__}")
 
-        >>> verificar_str(123)
-        Traceback (most recent call last):
-            ...
-        TypeError: 123 deve ser str. Você passou int
-     """
 
-    if not isinstance(string, str):
-        raise TypeError(f'"{string}" deve ser str. Você passou {type(string).__name__}')
-
-    return string
-
+    if not isinstance(valor_var, tipo_esperado):
+        esperado = (
+            tipo_esperado.__name__
+            if isinstance(tipo_esperado, type)
+            else ', '.join(t.__name__ for t in tipo_esperado)
+        )
+        raise TypeError(
+            f"{nome_var} deve receber {esperado}. "
+            f"Você passou {type(valor_var).__name__}"
+        )
+    
 def validar_diretorio(diretorio: str) -> bool | str:
     """
     Verifica se o diretório existe. Retorna True se existir caso contrário, lança FileNotFoundError.
@@ -56,7 +63,7 @@ def validar_diretorio(diretorio: str) -> bool | str:
     """
 
     #Type check
-    diretorio = validar_str(diretorio)
+    validar_tipo('diretorio', diretorio, str)
 
     #Verificando se o diretório existe
     if not exists(diretorio):
@@ -79,12 +86,9 @@ def verificar_condicao(endereco: str, subgrupo: str, condicoes: Iterable) -> boo
     """
 
     #Type check
-    if not isinstance(endereco, str):
-        raise TypeError(f"endereco deve ser str. Você passou {type(endereco).__name__}")
-    if not isinstance(subgrupo, str):
-        raise TypeError(f"subgrupo deve ser str. Você passou {type(subgrupo).__name__}")
-    if not isinstance(condicoes, Iterable):
-        raise TypeError(f"condicoes deve ser Iterable. Você passou {type(condicoes).__name__}")
+    validar_tipo('endereco', endereco, str)
+    validar_tipo('subgrupo', subgrupo, str)
+    validar_tipo('condicoes', condicoes, Iterable)
     
     #Value check
     if not endereco:
@@ -123,14 +127,10 @@ def atende_as_condicoes(endereco: str, grupo_base: str, subgrupo: str, condicoes
     """
 
     #Type check
-    if not isinstance(endereco, str):
-        raise TypeError(f"endereco deve ser str. Você passou {type(endereco).__name__}")
-    if not isinstance(grupo_base, str):
-        raise TypeError(f"grupo_base deve ser str. Você passou {type(grupo_base).__name__}")
-    if not isinstance(subgrupo, str):
-        raise TypeError(f"subgrupo deve ser str. Você passou {type(subgrupo).__name__}")
-    if not isinstance(condicoes, Iterable):
-        raise TypeError(f"condicoes deve ser Iterable. Você passou {type(condicoes).__name__}")
+    validar_tipo('endereco', endereco, str)
+    validar_tipo('subgrupo', subgrupo, str)
+    validar_tipo('grupo_base', grupo_base, str)
+    validar_tipo('condicoes', condicoes, Iterable)
 
 
     endereco = endereco.lower()

@@ -7,6 +7,8 @@ from typing import Any
 
 from .utills import pedir_diretorio, adicionar_a
 
+from .validar import validar_tipo
+
 with open("src\\organizador_package\\config.json", "r", encoding="utf-8") as config:
     config = json.load(config)
 
@@ -26,8 +28,7 @@ def ler_arquivos(diretorio: str) -> tuple[str]:
     """
 
     #Type check
-    if not isinstance(diretorio, str):
-        raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
+    validar_tipo('diretorio', diretorio, str)
     #Value check
     if not diretorio:
         raise ValueError(f"o diretorio não pode estar vazio")
@@ -53,7 +54,7 @@ def separar_por_template(
 
     Args:
         enderecos (Iterable[str]): Coleção com os endereços dos arquivos.
-        template (dict[str, any]): Template de separação.
+        template (str): Template de separação.
 
     Returns:
         dict ([str, any]): Arquivos separados.
@@ -72,10 +73,8 @@ def separar_por_template(
     """
     
     #Type check
-    if not isinstance(enderecos, Iterable):
-        raise TypeError(f"enderecos deve ser um iterável. Você passou {type(enderecos).__name__}")
-    if not isinstance(template, str):
-        raise TypeError(f"template deve ser str. Você passou {type(template).__name__}")
+    validar_tipo('enderecos', enderecos, Iterable)
+    validar_tipo('template', template, str)
     #Value check
     if not enderecos:
         raise ValueError("enderecos não pode estar vazio")
@@ -138,8 +137,7 @@ def gerar_enderecos(
     """
 
     #Type check
-    if not isinstance(arqs_por_template, dict):
-        raise TypeError(f"arqs_por_template deve ser dict. Você passou {type(arqs_por_template).__name__}")
+    validar_tipo('arqs_por_template', arqs_por_template, dict)
     #Value check
     if not arqs_por_template:
         raise ValueError(f"arqs_por_template não pode estar vazio")
@@ -171,10 +169,8 @@ def criar_pastas(diretorio: str, enderecos: Iterable[str]) -> None:
     """
 
     #Type check
-    if not isinstance(diretorio, str):
-        raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
-    if not isinstance(enderecos, Iterable):
-        raise TypeError(f"enderecos deve ser Iterable. Você passou {type(enderecos).__name__}")
+    validar_tipo('diretorio', diretorio, str)
+    validar_tipo('enderecos', enderecos, Iterable)
     #Value check
     if not enderecos:
         raise ValueError(f"enderecos não pode estar vazio")
@@ -198,10 +194,8 @@ def mover_arquivos(diretorio: str, enderecos: Iterable[str]) -> None:
     """
 
     #Type check
-    if not isinstance(diretorio, str):
-        raise TypeError(f"diretorio deve ser str. Você passou {type(diretorio).__name__}")
-    if not isinstance(enderecos, Iterable):
-        raise TypeError(f"enderecos deve ser Iterable. Você passou {type(enderecos).__name__}")
+    validar_tipo('diretorio', diretorio, str)
+    validar_tipo('enderecos', enderecos, Iterable)
     #Value check
     if not enderecos:
         raise ValueError(f"enderecos não pode estar vazio")
@@ -217,7 +211,7 @@ def executar_pipe_organizador():
     try:
         diretorio = pedir_diretorio()
         enderecos = ler_arquivos(diretorio)
-        enderecos_separados = separar_por_template(enderecos, template='TEMPLATE_PROJETOS')
+        enderecos_separados = separar_por_template(enderecos)
         lista_de_enderecos = gerar_enderecos(enderecos_separados)
         criar_pastas(diretorio, lista_de_enderecos)
         mover_arquivos(diretorio, lista_de_enderecos)
